@@ -12,6 +12,7 @@ class_name Player
 
 @onready var hurtbox: Hurtbox = $Hurtbox
 @onready var stats: StatSystem = $StatSystem
+@onready var placeholder_visual: Node2D = $PlaceholderVisual
 
 var _dash_timer: float = 0.0
 var _dash_cooldown_timer: float = 0.0
@@ -38,6 +39,7 @@ func _process_movement() -> void:
 
 	if input_dir != Vector2.ZERO:
 		_dash_direction = input_dir
+		placeholder_visual.rotation = input_dir.angle()
 
 	if Input.is_action_just_pressed("dash") and _dash_cooldown_timer <= 0.0:
 		_start_dash()
