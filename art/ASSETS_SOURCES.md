@@ -8,7 +8,7 @@ Assets temporales para poder jugar/probar mientras no tengamos el arte pintado/c
 |---|---|---|---|
 | `art/ui/kenney_ui_pack_rpg/` | [Kenney — UI Pack (RPG Expansion)](https://kenney.nl/assets/ui-pack-rpg-expansion) | CC0 (sin atribución requerida) | Barras de vida/maná, marcos de skill slots — placeholder del HUD |
 | `art/ui/kenney_ui_pack/` | [Kenney — UI Pack](https://kenney.nl/assets/ui-pack) | CC0 | Botones, paneles, sliders genéricos para menús |
-| `art/environment/tiny_rpg_forest/` | [Tiny RPG Forest by Luis Zuno (ansimuz)](https://opengameart.org/content/tiny-rpg-forest) — OpenGameArt | CC0 / dominio público (crédito no obligatorio) | Árboles (naranja/rosa/seco), arbustos, rocas, tronco, cartel — usados en `scenes/main/main.tscn` para el entorno boscoso. El pack también trae un héroe arquero animado y enemigos **Treant** y **Mole** (no usados todavía, quedan en el zip original para cuando armemos enemigos) |
+| `art/environment/tiny_rpg_forest/` | [Tiny RPG Forest by Luis Zuno (ansimuz)](https://opengameart.org/content/tiny-rpg-forest) — OpenGameArt | CC0 / dominio público (crédito no obligatorio) | Árboles, arbustos, rocas, tronco, cartel (bosque) + pared de piedra/puerta/entrada de cueva recortadas del tileset (`ruins/`) para la ruina, + piso de tierra tileable (`ruins/floor_dirt.png`) + enemigos **Mole** y **Treant** (`enemies/`, instanciados como `scenes/enemies/mole.tscn` y `treant.tscn` con Hurtbox+HealthSystem reales). El pack también trae un héroe arquero animado y ciclos de caminata completos para Mole/Treant no usados todavía (están en el zip original, no en el repo, para cuando se implemente IA/movimiento de enemigos) |
 
 ## Pendientes de descarga manual (requieren cuenta/click en el sitio)
 
