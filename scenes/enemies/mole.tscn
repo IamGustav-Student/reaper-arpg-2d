@@ -1,16 +1,21 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Texture2D" path="res://art/environment/tiny_rpg_forest/enemies/mole-idle-front.png" id="1"]
 [ext_resource type="Script" path="res://scripts/combat/health_system.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/combat/hurtbox.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/enemies/enemy.gd" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/pickups/soul_orb.tscn" id="5"]
+[ext_resource type="Script" path="res://scripts/combat/hitbox.gd" id="6"]
+[ext_resource type="Resource" path="res://resources/attacks/mole_bite.tres" id="7"]
 
 [sub_resource type="CircleShape2D" id="circle_mole_body"]
 radius = 10.0
 
 [sub_resource type="CircleShape2D" id="circle_mole_hurtbox"]
 radius = 14.0
+
+[sub_resource type="CircleShape2D" id="circle_mole_hitbox"]
+radius = 12.0
 
 [node name="Mole" type="CharacterBody2D"]
 collision_layer = 1
@@ -19,6 +24,11 @@ scale = Vector2(2.5, 2.5)
 script = ExtResource("4")
 soul_orb_scene = ExtResource("5")
 soul_essence_drop = 15.0
+move_speed = 90.0
+detection_radius = 200.0
+attack_range = 30.0
+attack_cooldown = 1.2
+attack_duration = 0.15
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1")
@@ -38,3 +48,10 @@ health_system = NodePath("../HealthSystem")
 
 [node name="HurtboxShape" type="CollisionShape2D" parent="Hurtbox"]
 shape = SubResource("circle_mole_hurtbox")
+
+[node name="Hitbox" type="Area2D" parent="."]
+script = ExtResource("6")
+attack_data = ExtResource("7")
+
+[node name="HitboxShape" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("circle_mole_hitbox")

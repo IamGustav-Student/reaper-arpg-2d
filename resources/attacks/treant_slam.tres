@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AttackData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/attack_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+attack_name = "Golpe de Rama"
+base_damage_multiplier = 2.0
+knockback_force = 8.0
+stagger_duration = 0.3
+active_frame_start = 2
+active_frame_end = 4
+element_type = 0

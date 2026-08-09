@@ -1,16 +1,21 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Texture2D" path="res://art/environment/tiny_rpg_forest/enemies/treant-idle-front.png" id="1"]
 [ext_resource type="Script" path="res://scripts/combat/health_system.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/combat/hurtbox.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/enemies/enemy.gd" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/pickups/soul_orb.tscn" id="5"]
+[ext_resource type="Script" path="res://scripts/combat/hitbox.gd" id="6"]
+[ext_resource type="Resource" path="res://resources/attacks/treant_slam.tres" id="7"]
 
 [sub_resource type="CircleShape2D" id="circle_treant_body"]
 radius = 13.0
 
 [sub_resource type="CircleShape2D" id="circle_treant_hurtbox"]
 radius = 17.0
+
+[sub_resource type="CircleShape2D" id="circle_treant_hitbox"]
+radius = 16.0
 
 [node name="Treant" type="CharacterBody2D"]
 collision_layer = 1
@@ -19,6 +24,11 @@ scale = Vector2(3, 3)
 script = ExtResource("4")
 soul_orb_scene = ExtResource("5")
 soul_essence_drop = 40.0
+move_speed = 50.0
+detection_radius = 250.0
+attack_range = 50.0
+attack_cooldown = 2.0
+attack_duration = 0.25
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1")
@@ -38,3 +48,10 @@ health_system = NodePath("../HealthSystem")
 
 [node name="HurtboxShape" type="CollisionShape2D" parent="Hurtbox"]
 shape = SubResource("circle_treant_hurtbox")
+
+[node name="Hitbox" type="Area2D" parent="."]
+script = ExtResource("6")
+attack_data = ExtResource("7")
+
+[node name="HitboxShape" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("circle_treant_hitbox")

@@ -17,6 +17,7 @@ class_name Player
 @onready var stats: StatSystem = $StatSystem
 @onready var placeholder_visual: Node2D = $PlaceholderVisual
 @onready var hitbox: Hitbox = $Hitbox
+@onready var health_system: HealthSystem = $HealthSystem
 
 var _dash_timer: float = 0.0
 var _dash_cooldown_timer: float = 0.0
@@ -28,6 +29,11 @@ var _is_attacking: bool = false
 
 func _ready() -> void:
 	add_to_group("player")
+	health_system.died.connect(_on_died)
+
+## Sin pantalla de game over todavía: reinicia el nivel al morir.
+func _on_died() -> void:
+	get_tree().reload_current_scene()
 
 func _physics_process(delta: float) -> void:
 	_dash_cooldown_timer = max(0.0, _dash_cooldown_timer - delta)
