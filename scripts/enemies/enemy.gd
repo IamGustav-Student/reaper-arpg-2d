@@ -23,9 +23,15 @@ var _is_attacking: bool = false
 
 func _ready() -> void:
 	health_system.died.connect(_on_died)
-	_target = get_tree().get_first_node_in_group("player")
 
 func _physics_process(delta: float) -> void:
+	# Búsqueda perezosa en vez de una sola vez en _ready(): Player y los
+	# enemigos son hermanos que se instancian a la vez, así que no hay
+	# garantía de que Player ya esté en el grupo "player" cuando corre
+	# el _ready() de este enemigo.
+	if _target == null or not is_instance_valid(_target):
+		_target = get_tree().get_first_node_in_group("player")
+
 	_attack_cooldown_timer = max(0.0, _attack_cooldown_timer - delta)
 
 	if _is_attacking:

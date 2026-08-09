@@ -2,13 +2,19 @@ extends Area2D
 class_name Hurtbox
 ## Zona de recepción de daño (GDD sección 3.1). collision_layer alterna entre
 ## "Hurtbox" e "Invulnerable" durante los i-frames del Dash.
+##
+## health_system se resuelve por convención de estructura (nodo hermano
+## "HealthSystem"), no por @export: un @export tipado como HealthSystem
+## asignado a mano en un .tscn como NodePath(...) NO se resuelve a una
+## referencia real de nodo (queda null) — solo funciona si se arrastra desde
+## el inspector del editor.
 
 signal damage_received(amount: float, source: Node)
 
-const LAYER_HURTBOX := 1 << 2   # capa "Hurtbox" (bit 3, ver project.godot [layer_names])
-const LAYER_INVULNERABLE := 1 << 3   # capa "Invulnerable" (bit 4)
+const LAYER_HURTBOX := 1 << 2   # capa "Hurtbox" (ver project.godot [layer_names])
+const LAYER_INVULNERABLE := 1 << 3   # capa "Invulnerable"
 
-@export var health_system: HealthSystem
+@onready var health_system: HealthSystem = get_node("../HealthSystem")
 
 func _ready() -> void:
 	collision_layer = LAYER_HURTBOX

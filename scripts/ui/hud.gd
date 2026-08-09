@@ -10,9 +10,17 @@ const SOUL_BAR_WIDTH := 220.0
 func _ready() -> void:
 	SoulHarvestManager.soul_meter_changed.connect(_on_soul_changed)
 	_on_soul_changed(SoulHarvestManager.soul_meter, SoulHarvestManager.soul_meter_max)
+	_connect_to_player()
 
+func _connect_to_player(attempts_left: int = 10) -> void:
 	var player := get_tree().get_first_node_in_group("player")
 	if player == null:
+		# Player y HUD son hermanos instanciados a la vez: si todavía no
+		# está en el grupo, reintentar en el próximo frame en vez de
+		# quedarse sin conectar para siempre.
+		if attempts_left > 0:
+			await get_tree().process_frame
+			_connect_to_player(attempts_left - 1)
 		return
 	var health_system: HealthSystem = player.get_node("HealthSystem")
 	health_system.health_changed.connect(_on_health_changed)

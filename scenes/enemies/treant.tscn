@@ -44,7 +44,6 @@ max_health = 120.0
 
 [node name="Hurtbox" type="Area2D" parent="."]
 script = ExtResource("3")
-health_system = NodePath("../HealthSystem")
 
 [node name="HurtboxShape" type="CollisionShape2D" parent="Hurtbox"]
 shape = SubResource("circle_treant_hurtbox")
