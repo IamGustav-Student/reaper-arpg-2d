@@ -1,6 +1,7 @@
 extends Node
-class_name SoulHarvestManager
-## Cosecha de Almas (GDD sección 3.3): medidor de almas y Modo Furia Rúnica.
+## Autoload: SoulHarvestManager (GDD sección 3.3) — medidor de almas y Modo Furia Rúnica.
+## Sin class_name a propósito: como autoload ya es accesible globalmente como
+## "SoulHarvestManager"; declarar también class_name colisiona con ese nombre.
 
 signal soul_meter_changed(current: float, max_value: float)
 signal rune_fury_activated

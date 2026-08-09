@@ -502,6 +502,8 @@ Basado en consensos de r/gamedev y charlas GDC de referentes 2D:
 - [x] **Hito 1.5:** Pivot de motor: arquitectura técnica migrada de Unity URP 2D a **Godot 4.x** (Secciones 2.2, 3.1 y 7).
 - [x] **Hito 2:** Configuración del proyecto Godot (Viewport 1280x720, escalado fraccional, estructura de carpetas, Autoloads base y shader de Hit Flash).
 - [x] **Hito 2.5:** Pivot de dirección de arte: de Pixel Art de grilla baja a estilo pintado/chibi de alta resolución (ver imagen de referencia y Secciones 1.2, 1.4, 2.1, 2.2).
-- [ ] **Hito 3:** Prototipo del controlador de movimiento 2D, Dash con I-Frames e integración de Frame Data para Hitbox/Hurtbox.
-- [ ] **Hito 4:** Prototipo del sistema de Cosecha de Almas (Soul Harvest) y medidor de furia.
-- [ ] **Hito 5:** Creación de la UI del Árbol de Habilidades con Nodos interactivos mediante `Resource`s personalizados.
+- [x] **Hito 2.6:** Entorno de prueba (bosque + ruina con muros/puerta/cueva) poblado con enemigos placeholder (Mole, Treant), usando assets CC0 descargados (`art/ASSETS_SOURCES.md`).
+- [x] **Hito 3 (Vertical Slice):** Loop mínimo jugable de punta a punta — Player ataca con Hitbox real (`AttackData` "Corte Básico"), el daño usa la fórmula StatSystem-atacante × multiplicador de ataque, el enemigo muere (`HealthSystem.died`) y suelta un Orbe de Alma que vuela hacia el jugador y se acredita en `SoulHarvestManager` (autoload), y el HUD (`scenes/ui/hud.tscn`) refleja Vida y Medidor de Almas en vivo.
+- [ ] **Hito 4:** IA/movimiento básico de enemigos (Mole/Treant persiguen y atacan al jugador), y que el jugador pueda morir/recibir daño real.
+- [ ] **Hito 5:** Animaciones reales del Player (Idle/Run/Attack) reemplazando el `PlaceholderVisual`, con Call Method Track para activar el Hitbox en la ventana de frames correcta (en vez del timer fijo actual).
+- [ ] **Hito 6:** Creación de la UI del Árbol de Habilidades con Nodos interactivos mediante `Resource`s personalizados.

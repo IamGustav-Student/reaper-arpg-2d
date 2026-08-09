@@ -19,6 +19,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 GameManager="*res://autoloads/game_manager.gd"
 SoundManager="*res://autoloads/sound_manager.gd"
+SoulHarvestManager="*res://scripts/combat/soul_harvest_manager.gd"
 
 [display]
 

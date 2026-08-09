@@ -17,11 +17,17 @@ func _ready() -> void:
 func set_invulnerable(value: bool) -> void:
 	collision_layer = LAYER_INVULNERABLE if value else LAYER_HURTBOX
 
-## Llamado por Hitbox.gd al detectar solapamiento. El cálculo real de daño debe
-## combinar StatSystem del atacante + AttackData; aquí se deja un placeholder simple.
+## Llamado por Hitbox.gd al detectar solapamiento. Combina el daño físico del
+## StatSystem del atacante (si tiene uno) con el multiplicador del ataque.
 func receive_hit(attack_data: AttackData, source: Node) -> void:
 	if health_system == null:
 		return
-	var damage := attack_data.base_damage_multiplier * 10.0
+
+	var attacker_physical_damage := 10.0  # fallback si el atacante no tiene StatSystem
+	if source and source.has_node("StatSystem"):
+		var attacker_stats: StatSystem = source.get_node("StatSystem")
+		attacker_physical_damage = attacker_stats.physical_damage
+
+	var damage := attack_data.base_damage_multiplier * attacker_physical_damage
 	health_system.take_damage(damage)
 	damage_received.emit(damage, source)
