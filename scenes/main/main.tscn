@@ -1,7 +1,8 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="17"]
+[ext_resource type="Script" path="res://scripts/world/chunk_manager.gd" id="18"]
 [ext_resource type="Texture2D" path="res://art/environment/tiny_rpg_forest/sliced-objects/tree-orange.png" id="2"]
 [ext_resource type="Texture2D" path="res://art/environment/tiny_rpg_forest/sliced-objects/tree-pink.png" id="3"]
 [ext_resource type="Texture2D" path="res://art/environment/tiny_rpg_forest/sliced-objects/tree-dried.png" id="4"]
@@ -386,7 +387,19 @@ shape = SubResource("rect_wall")
 [node name="Mole1" parent="." instance=ExtResource("15")]
 position = Vector2(60, -250)
 
+[node name="Mole2" parent="." instance=ExtResource("15")]
+position = Vector2(250, 50)
+
+[node name="Mole3" parent="." instance=ExtResource("15")]
+position = Vector2(-400, -100)
+
 [node name="Treant1" parent="." instance=ExtResource("16")]
 position = Vector2(-250, 250)
 
+[node name="Treant2" parent="." instance=ExtResource("16")]
+position = Vector2(400, 150)
+
 [node name="HUD" parent="." instance=ExtResource("17")]
+
+[node name="ChunkManager" type="Node2D" parent="."]
+script = ExtResource("18")
