@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SkillNodeData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_node_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+skill_name = "Paso Espectral"
+description = "Se teletransporta detrás del enemigo más cercano, volviéndose invisible durante 2 segundos y aumentando la probabilidad de crítico del siguiente ataque en un 50%."
+node_type = 0
+max_level = 3
+mana_cost = 0.0
+cooldown = 8.0
+required_points_in_branch = 8

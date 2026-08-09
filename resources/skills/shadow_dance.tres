@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SkillNodeData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_node_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+skill_name = "Danza de las Hojas Sombrías"
+description = "Ejecuta una ráfaga de 3 cortes giratorios que dañan a todos los enemigos a su alrededor infligiendo 80% + (10% x Nivel) de daño físico y de sombra."
+node_type = 0
+max_level = 5
+mana_cost = 15.0
+cooldown = 0.0
+required_points_in_branch = 0

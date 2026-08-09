@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SkillNodeData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/skill_node_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+skill_name = "Seducción de la Oscuridad"
+description = "Incrementa la velocidad de ataque un 3% por cada enemigo cercano afectado por sangrado (acumulable hasta 5 veces)."
+node_type = 1
+max_level = 5
+mana_cost = 0.0
+cooldown = 0.0
+required_points_in_branch = 15
