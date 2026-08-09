@@ -24,6 +24,7 @@ const BUSH_TEXTURES := [
 	"res://art/environment/tiny_rpg_forest/sliced-objects/bush-tall.png",
 ]
 const ROCK_TEXTURE := "res://art/environment/tiny_rpg_forest/sliced-objects/rock.png"
+const FLOOR_TEXTURE := "res://art/environment/tiny_rpg_forest/ruins/floor_dirt.png"
 
 var _enemy_scenes: Array[PackedScene] = [
 	preload("res://scenes/enemies/mole.tscn"),
@@ -78,6 +79,8 @@ func _generate_forest_chunk(coord: Vector2i) -> Node2D:
 
 	var half := CHUNK_SIZE / 2.0
 
+	_spawn_floor(chunk, half)
+
 	for i in rng.randi_range(4, 7):
 		var local_pos := Vector2(rng.randf_range(-half, half), rng.randf_range(-half, half))
 		_spawn_tree(chunk, TREE_TEXTURES[rng.randi_range(0, TREE_TEXTURES.size() - 1)], local_pos, rng.randf_range(1.6, 2.2))
@@ -97,6 +100,18 @@ func _generate_forest_chunk(coord: Vector2i) -> Node2D:
 		chunk.add_child(enemy)
 
 	return chunk
+
+func _spawn_floor(chunk: Node2D, half: float) -> void:
+	var floor_rect := TextureRect.new()
+	floor_rect.z_index = -10
+	floor_rect.texture = load(FLOOR_TEXTURE)
+	floor_rect.texture_filter = 1
+	floor_rect.stretch_mode = TextureRect.STRETCH_TILE
+	floor_rect.offset_left = -half
+	floor_rect.offset_top = -half
+	floor_rect.offset_right = half
+	floor_rect.offset_bottom = half
+	chunk.add_child(floor_rect)
 
 func _spawn_tree(parent: Node2D, texture_path: String, local_pos: Vector2, scale_factor: float) -> void:
 	var body := StaticBody2D.new()
