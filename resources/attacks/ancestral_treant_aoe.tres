@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AttackData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/attack_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+attack_name = "Pisotón Sísmico"
+base_damage_multiplier = 5.0
+knockback_force = 20.0
+stagger_duration = 0.6
+active_frame_start = 1
+active_frame_end = 2
+element_type = 3

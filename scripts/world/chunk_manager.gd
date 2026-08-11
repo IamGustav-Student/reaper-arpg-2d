@@ -31,10 +31,14 @@ const FLOOR_TEXTURE := "res://art/environment/tiny_rpg_forest/ruins/floor_dirt.p
 const TIER_STAT_MULTIPLIER := [1.0, 1.0, 1.5, 2.2, 3.0]
 const TIER_ELITE_CHANCE := [0.0, 0.0, 0.15, 0.30, 0.45]
 
+const BOSS_MIN_DISTANCE := 5
+const BOSS_CHUNK_MODULO := 7  # 1 de cada 7 chunks elegibles (distancia >= 5) es un Boss Chunk
+
 var _enemy_scenes: Array[PackedScene] = [
 	preload("res://scenes/enemies/mole.tscn"),
 	preload("res://scenes/enemies/treant.tscn"),
 ]
+var _boss_scene: PackedScene = preload("res://scenes/enemies/boss_treant.tscn")
 
 var _player: Node2D
 var _loaded_chunks: Dictionary = {}  # Vector2i -> Node2D
@@ -85,6 +89,14 @@ func _danger_tier(coord: Vector2i) -> int:
 	else:
 		return 4
 
+## Determinístico (misma semilla que el resto del chunk): reproducible, no
+## aleatorio puro. Ver docs/ENEMY_AND_BOSS_PROGRESSION_PLAN.md sección 3.
+func _is_boss_chunk(coord: Vector2i) -> bool:
+	var distance := maxi(absi(coord.x), absi(coord.y))
+	if distance < BOSS_MIN_DISTANCE:
+		return false
+	return absi(hash(coord)) % BOSS_CHUNK_MODULO == 0
+
 func _generate_forest_chunk(coord: Vector2i) -> Node2D:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(coord)
@@ -111,16 +123,24 @@ func _generate_forest_chunk(coord: Vector2i) -> Node2D:
 		else:
 			_spawn_rock(chunk, local_pos)
 
-	for i in rng.randi_range(1, 3):
-		var local_pos := Vector2(rng.randf_range(-half, half), rng.randf_range(-half, half))
-		var enemy_scene: PackedScene = _enemy_scenes[rng.randi_range(0, _enemy_scenes.size() - 1)]
-		var enemy: Enemy = enemy_scene.instantiate()
-		enemy.position = local_pos
-		enemy.power_multiplier = TIER_STAT_MULTIPLIER[tier]
-		enemy.is_elite = rng.randf() < TIER_ELITE_CHANCE[tier]
-		chunk.add_child(enemy)
+	if _is_boss_chunk(coord):
+		_spawn_boss(chunk)
+	else:
+		for i in rng.randi_range(1, 3):
+			var local_pos := Vector2(rng.randf_range(-half, half), rng.randf_range(-half, half))
+			var enemy_scene: PackedScene = _enemy_scenes[rng.randi_range(0, _enemy_scenes.size() - 1)]
+			var enemy: Enemy = enemy_scene.instantiate()
+			enemy.position = local_pos
+			enemy.power_multiplier = TIER_STAT_MULTIPLIER[tier]
+			enemy.is_elite = rng.randf() < TIER_ELITE_CHANCE[tier]
+			chunk.add_child(enemy)
 
 	return chunk
+
+func _spawn_boss(chunk: Node2D) -> void:
+	var boss: Node2D = _boss_scene.instantiate()
+	boss.position = Vector2.ZERO
+	chunk.add_child(boss)
 
 func _spawn_floor(chunk: Node2D, half: float) -> void:
 	var floor_rect := TextureRect.new()
