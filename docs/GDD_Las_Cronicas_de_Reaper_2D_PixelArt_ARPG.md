@@ -15,12 +15,15 @@ Al migrar hacia un **ARPG 2D Top-Down / Isometric con arte pintado de alto detal
 
 ### 1.2 Referentes de Diseño del Sector
 * **Battle Chasers: Nightwar:** Referente principal de dirección de arte — personajes pintados de proporciones "chibi" (cabeza grande, cuerpo pequeño), iluminación dramática y detalle pictórico sobre una cámara 3/4 top-down. Es el referente visual más cercano a la imagen de concepto aprobada para Reaper.
+* **Echoes of Mystralia (Borealys Games - 2026):** Referente principal de **creación libre y modular de habilidades (Spellcrafting / Soul-Crafting)**, ritmo de combate en perspectiva isométrica y sistema de fisuras/brechas procedurales para el endgame.
 * **Eternium & Diablo Immortal (versión móvil):** Referentes en HUD de combate (orbes de Vida/Maná, barra de habilidades inferior) y en cómo un estilo pintado de alto detalle se integra con partículas y efectos de arma brillante.
 * **Bastion:** Referente en atmósfera de mazmorra pintada, paletas cálidas de antorchas contra piedra oscura, y cámara fija 3/4 que enmarca el combate.
 * **The Slormancer & Chronicon:** Referentes en profundidad de árboles de habilidades, personalización de build, recolección de loot y escalabilidad de números en endgame.
 * **Children of Morta:** Referente en la animación frame-by-frame narrativa y el impacto de los efectos visuales en combates contra hordas (independiente del estilo de arte final).
 
 > **Nota (2026-08-08):** el proyecto pivotó de Pixel Art de grilla baja a un estilo **pintado/chibi de mayor resolución** (ver imagen de referencia `WhatsApp Image 2026-08-08 at 16.45.48.jpeg`), manteniendo intactos el core loop, sistema de combate, stats, skill trees y loot del resto de este documento — el cambio es puramente de dirección de arte y su pipeline técnico asociado (Secciones 1.4 y 2).
+
+> **Nota (2026-08-11 — alcance de clase, ver `REAPER_DIRECTION_ANALYSIS.md`):** de las 4 clases descritas en la Sección 5, **solo el Cosechador está en desarrollo activo**. Caballero Guardián, Mago Rúnico y Cazador de Sombras quedan como notas de diseño a futuro, no como items de roadmap, hasta que el Cosechador esté completo end-to-end (sus 3 ramas, su Soul-Crafting, y al menos un World Boss). El nombre del juego es *Las Crónicas de Reaper*; el Cosechador es el producto mínimo completo antes de pensar en multiclase.
 
 ### 1.3 Core Loop de Juego
 ```
@@ -113,7 +116,7 @@ Para garantizar un combate táctil y preciso similar al de los juegos de pelea o
 extends Resource
 class_name AttackData
 
-enum ElementType { PHYSICAL, FIRE, FROST, SHADOW }
+enum ElementType { PHYSICAL, FIRE, FROST, SHADOW, BLOOD }
 
 @export var attack_name: String = ""
 @export var base_damage_multiplier: float = 1.0
@@ -125,7 +128,6 @@ enum ElementType { PHYSICAL, FIRE, FROST, SHADOW }
 @export var hit_vfx_scene: PackedScene
 @export var hit_sfx: AudioStream
 ```
-Se crean instancias como archivos `.tres` (`Recurso Nuevo > AttackData` desde el editor de Godot), equivalente directo al flujo `CreateAssetMenu` de Unity.
 
 ### 3.2 Mecánicas Clave de Combate
 * **Dash / Esquiva con Frames de Invulnerabilidad (I-Frames):**
@@ -154,6 +156,50 @@ Cada enemigo derrotado en el mundo suelta de 1 a 5 **Orbes de Esencia de Alma**.
                                       ▼                                                           ▼
                         [ Consumo de Cargas de Alma ]                               [ Modo Furia Rúnica (100%) ]
                         (Ejecución de Definitivas)                                  (+25% Vel. Ataque, +15% Robo Vida)
+```
+
+### 3.4 Sistema Insignia de Forja Rúnica de Almas (Soul-Crafting)
+Inspirado en la libertad de creación de *Echoes of Mystralia*, Reaper incorpora el **Sistema de Soul-Crafting**, permitiendo al jugador forjar habilidades únicas combinando Runas de Almas cosechadas.
+
+> **Relación con el Skill Tree (Sección 5) — resuelta en `REAPER_DIRECTION_ANALYSIS.md`:** el Skill Tree y el Soul-Crafting NO son dos fuentes paralelas de habilidades activas. **El Skill Tree otorga poder pasivo y *slots* de runa activa; el Soul-Crafting define qué hace cada slot.** Los nodos activos de una rama (ej. Tier 1 y Tier 3 de la Rama A) dejan de ser una habilidad fija con nombre propio y pasan a ser el desbloqueo de un **Slot de Runa Activa** / **Slot de Runa de Movilidad** — ver la Sección 5.1 actualizada. Los Keystones (Tier 5) sí quedan fijos: un Hito Maestro espectacular no necesita ser modular.
+>
+> **Adquisición de runas:** las runas se desbloquean/craftean gastando **Esencia de Alma** (el mismo medidor de `SoulHarvestManager`, GDD Sección 3.3) en un **Altar de Almas** — no se introduce una moneda nueva. Esto le da un uso permanente a las almas cosechadas más allá de la Furia Rúnica temporal.
+>
+> **Alcance del prototipo (Hito 7-8):** empezar chico a propósito — **3 Runas de Forma × 2 Runas de Modificador × 2 Runas de Trigger** (12 combinaciones, no "infinitas"). Cada combinación se diferencia por *números* (daño, radio, duración, knockback) reusando el `Hitbox`/`AttackData` ya construido, no con VFX únicos por combinación — evita el riesgo de que un sistema combinatorio requiera arte que hoy no existe.
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                   FORJA RÚNICA DE ALMAS (SOUL-CRAFTING)                 │
+├────────────────────────────────────────────────────────────────────────┤
+│ 1. Runa de Ejecución (Forma): Tajo Giro, Guadaña Espectral, Nova.      │
+│ 2. Runa de Modificador (Efecto): Vampirismo, Ceniza doT, Succión.      │
+│ 3. Runa de Desencadenante (Trigger): Al Asestar Crítico, Al Esquivar.  │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Capas de Composición Rúnica:
+1. **Runa de Ejecución / Forma (Shape):** Define el patrón espacial y visual del ataque (Barrido de Guadaña, Proyectil Volador, Nova Terrestre, Grieta).
+2. **Runa de Modificador de Alma (Modifier):** Altera los atributos del impacto (Sed de Sangre, Daño por Quemadura de Ceniza, Succión Centrípeda, Penetración).
+3. **Runa de Desencadenante / Trigger:** Define condiciones de disparo automático (*"Al matar enemigo"*, *"Al esquivar con Dash"*, *"Al acertar golpe crítico"*).
+
+#### Implementación GDScript (`RuneData` & `RuneSpellBuilder`):
+```gdscript
+# scripts/data/rune_data.gd
+extends Resource
+class_name RuneData
+
+enum RuneCategory { SHAPE, MODIFIER, TRIGGER }
+enum SoulElement { SHADOW, FIRE, FROST, BLOOD, VOID }
+
+@export var rune_id: String = ""
+@export var rune_name: String = ""
+@export_multiline var description: String = ""
+@export var category: RuneCategory = RuneCategory.SHAPE
+@export var element: SoulElement = SoulElement.SHADOW
+@export var damage_modifier: float = 1.0
+@export var mana_cost_delta: float = 0.0
+@export var cooldown_delta: float = 0.0
+@export var vfx_override: PackedScene
 ```
 
 ---
@@ -210,20 +256,6 @@ Al subir de nivel, el jugador obtiene **3 Puntos de Atributos** para distribuir 
 4. **Rúnico / Épico (Púrpura):** 3 Prefijos y 3 Sufijos con valores elevados. 2 Ranuras rúnicas.
 5. **Ancestral / Legendario (Naranja):** Stats fijos temáticos + 1 **Efecto Único Legendario** + 2 a 3 Ranuras rúnicas.
 
-#### Generación de Afijos (Ejemplo de Tabla de Prefijos y Sufijos)
-
-```
-                       ┌────────────────────────────────────────┐
-                       │  Generación de Objeto Raro (Ej. Casco) │
-                       └───────────────────┬────────────────────┘
-                                           │
-                    ┌──────────────────────┴──────────────────────┐
-                    ▼                                             ▼
-       [ Prefijos (Hasta 2) ]                        [ Sufijos (Hasta 2) ]
-       • +25 HP Máxima (Vigoroso)                    • +3% Prob. Crítico (del Asesino)
-       • +12 Armadura (Inflexible)                   • +5% Reducción Cooldowns (Rúnico)
-```
-
 ---
 
 ## 5. Árboles de Habilidades Exhaustivos (Skill Trees) por Clase
@@ -244,134 +276,28 @@ Cada clase posee 3 Ramas Especializadas. Los jugadores reciben **1 Punto de Habi
 ```
 
 #### RAMA A: Cosechador de Sombras (Velocidad, Robo de Vida & Agilidad)
-* **Tier 1 (Nodo Activo - Req. Nivel 1):**
-  * **Nombre:** *Danza de las Hojas Sombrías*
-  * **Nivel Máx:** 5 | **Costo Maná:** 15
-  * **Efecto:** Ejecuta una ráfaga de 3 cortes giratorios que dañan a todos los enemigos a su alrededor infligiendo $80\% + (10\% \times \text{Nivel})$ de daño físico y de sombra.
-* **Tier 2 (Nodo Pasivo - Req. 3 Puntos en Rama):**
-  * **Nombre:** *Cuchillas Voraces*
-  * **Nivel Máx:** 5
-  * **Efecto:** Cura al Cosechador un $2\% + (1\% \times \text{Nivel})$ del daño infligido al asestar golpes críticos.
-* **Tier 3 (Nodo Activo - Req. 8 Puntos en Rama):**
-  * **Nombre:** *Paso Espectral*
-  * **Nivel Máx:** 3 | **Cooldown:** 8s
-  * **Efecto:** Se teletransporta detrás del enemigo más cercano, volviéndose invisible durante 2 segundos y aumentando la probabilidad de crítico del siguiente ataque en un $50\%$.
-* **Tier 4 (Nodo Pasivo - Req. 15 Puntos en Rama):**
-  * **Nombre:** *Seducción de la Oscuridad*
-  * **Nivel Máx:** 5
-  * **Efecto:** Incrementa la velocidad de ataque un $3\%$ por cada enemigo cercano afectado por sangrado (acumulable hasta 5 veces).
-* **Tier 5 (Hito Maestro / Keystone - Req. 20 Puntos en Rama):**
-  * **Nombre:** *Frenesí de Almas Desatadas*
-  * **Nivel Máx:** 1 | **Cooldown:** 45s | **Costo:** 100% Medidor de Almas
-  * **Efecto:** Entra en un estado de avatar sombrío durante 10 segundos. La velocidad de movimiento sube $+40\%$, el Dash no tiene cooldown y todos los ataques asestan daño crítico de sombra.
-
-#### RAMA B: Ejecutor Nigromántico (Impacto Pesado, Control & Caos)
-* **Tier 1 (Nodo Activo):** *Tajo de la Guadaña Ancestral* - Gran barrido frontal de 180° que empuja a los enemigos e inflige $150\%$ de daño.
-* **Tier 2 (Nodo Pasivo):** *Armadura de Ceniza* - Al infligir daño pesado, gana un escudo equivalente al $5\%$ de la vida máxima durante 4 segundos.
-* **Tier 3 (Nodo Activo):** *Onda de Decadencia* - Clava la guadaña en el suelo liberando una grieta de sombra que reduce la armadura de los enemigos en un $25\%$ por 6 segundos.
-* **Tier 4 (Nodo Pasivo):** *Sentencia del Verdugo* - Los enemigos con menos del $30\%$ de HP reciben un $40\%$ más de daño de todos tus ataques.
-* **Tier 5 (Keystone):** *Invocación de la Guadaña del Vacío* - Invoca una guadaña gigante del plano espectral que cae del cielo, aturdiendo a todos los enemigos en pantalla durante 3 segundos e infligiendo daño masivo de sombra.
-
-#### RAMA C: Pacto de las Almas (Cosecha, Drenaje & Utilidad)
-* **Tier 1 (Nodo Activo):** *Drenaje de Esencia* - Conecta un rayo de alma a un objetivo, drenando HP por segundo y recargando el Medidor de Almas.
-* **Tier 2 (Nodo Pasivo):** *Magnetismo del Abismo* - Aumenta el radio de atracción de los orbes de alma en un $+100\%$ y otorga $+5$ de maná por orbe recogido.
-* **Tier 3 (Nodo Activo):** *Santuario de las Almas Caídas* - Coloca un círculo rúnico en el suelo que cura a los aliados y daña a los enemigos dentro del área.
-* **Tier 4 (Nodo Pasivo):** *Pacto de Resurrección Rúnica* - Si el jugador sufre daño fatal, consume todo el medidor de almas para revivir instantáneamente con el $50\%$ de vida (Cooldown: 180s).
-* **Tier 5 (Keystone):** *Cosecha Arcana Suprema* - Detona todos los orbes de almas en el suelo, creando explosiones en cadena que otorgan invulnerabilidad temporal al Cosechador.
-
----
-
-### 5.2 Clase: Caballero Guardián
-
-#### RAMA A: Fortaleza Inquebrantable (Tanque Puro & Bloqueo)
-* **T1 (Activo):** *Golpe de Escudo de Torre* - Impacto frontal que aturde al objetivo por 1.5s y genera alta amenaza.
-* **T2 (Pasivo):** *Postura Inflexible* - Incrementa la probabilidad de bloqueo con escudo en un $+15\%$ y reduce el daño recibido por la espalda en $+20\%$.
-* **T3 (Activo):** *Provocación Inmortal* - Lanza un rugido que fuerza a todos los enemigos en 5 metros a atacar al Caballero y otorga $+30\%$ de armadura.
-* **T4 (Pasivo):** *Baluarte de Piedra* - Convierte un $10\%$ de la Armadura total en Daño Físico adicional.
-* **T5 (Keystone):** *Muro del Reino Alba* - Se vuelve completamente inmune a todo daño e interrupciones durante 5 segundos.
-
-#### RAMA B: Vengador del Temple (Contraataque & Mandoble)
-* **T1 (Activo):** *Carga del Temple* - Embestida veloz hacia adelante que arrastra a los enemigos en su camino.
-* **T2 (Pasivo):** *Espines de Hierro* - Devuelve el $25\%$ del daño recibido al atacante como daño físico.
-* **T3 (Activo):** *Sentencia de Acero* - Un corte descendente con mandoble que rompe el suelo e inflige daño crítico garantizado si el enemigo está aturdido.
-* **T4 (Pasivo):** *Furia del Vengador* - Ganar $+2\%$ de daño de ataque por cada $5\%$ de vida perdida.
-* **T5 (Keystone):** *Juicio Divino de la Forja* - Salta por los aires y cae aplastando el terreno con una explosión sagrada en área de 360°.
-
-#### RAMA C: Comandante Radiante (Auras & Soporte de Batalla)
-* **T1 (Activo):** *Aura del Alba* - Aura activa que otorga $+15\%$ de velocidad de movimiento a los aliados cercanos.
-* **T2 (Pasivo):** *Inspiración Caballeresca* - Reduce los tiempos de recarga de todas las habilidades de la party en un $10\%$.
-* **T3 (Activo):** *Estandarte del Reino* - Clava un estandarte sagrado que crea una zona de curación constante y resistencia a estados alterados.
-* **T4 (Pasivo):** *Bendición de la Luz Rúnica* - Los ataques del Caballero aplican una marca que cura a cualquier aliado que dañe al objetivo marcado.
-* **T5 (Keystone):** *Presencia del Comandante Invicto* - Convoca a la vanguardia de caballeros fantasmas que cargan en fila india limpiando la pantalla de enemigos.
-
----
-
-### 5.3 Clase: Mago Rúnico / Taumaturgo
-
-#### RAMA A: Tejedura del Fuego y Tormenta (DPS Elemental AoE)
-* **T1 (Activo):** *Orbe del Fuego Caótico* - Lanza una bola de fuego que explota al impacto dañando en un radio de 2 metros.
-* **T2 (Pasivo):** *Combustión Rúnica* - Los hechizos de fuego dejan a los enemigos ardiendo durante 4 segundos.
-* **T3 (Activo):** *Cadena de Rayos Ancestrales* - Descarga un rayo que salta entre 4 enemigos, reduciendo su velocidad de ataque.
-* **T4 (Pasivo):** *Sobrecarga Magmática* - Aumenta el daño de área (AoE) en un $+25\%$.
-* **T5 (Keystone):** *Cataclismo Rúnico (Meteorito)* - Invoca un meteoro gigante envuelto en runas que destruye el suelo y deja llamas abrasadoras.
-
-#### RAMA B: Guardián de la Escarcha (Control de Masas & Barreras)
-* **T1 (Activo):** *Lanza de Hielo Perforante* - Proyectil helado que atraviesa enemigos y los ralentiza un $40\%$.
-* **T2 (Pasivo):** *Piel de Escarcha* - Genera una barrera de hielo constante que absorbe daño según la Inteligencia.
-* **T3 (Activo):** *Nova Congelante* - Explosión helada centrada en el jugador que congela por completo a los enemigos por 2.5s.
-* **T4 (Pasivo):** *Frágil como el Cristal* - Los enemigos congelados reciben un $+50\%$ de daño crítico adicional.
-* **T5 (Keystone):** *Cero Absoluto* - Detiene el tiempo y la animación de todos los enemigos en la pantalla durante 4 segundos.
-
-#### RAMA C: Alquimia del Vacío y la Vida (DoTs, Drenaje & Maná)
-* **T1 (Activo):** *Orbe de Siphon Arcano* - Invoca un vórtice que atrae enemigos pequeños hacia su centro mientras drena maná.
-* **T2 (Pasivo):** *Flujo de Maná Infinito* - Regenera maná al matar enemigos y reduce los costos de hechizos.
-* **T3 (Activo):** *Distorsión Espacial* - Crea un portal de teletransporte corto para esquivar y posicionarse.
-* **T4 (Pasivo):** *Alquimia Corrupta* - Convierte el $20\%$ del daño mágico en daño de veneno continuo.
-* **T5 (Keystone):** *Singularidad Rúnica del Vacío* - Crea un agujero negro en el centro de la pantalla que succiona a todos los enemigos y los detona al finalizar.
-
----
-
-### 5.4 Clase: Cazador de Sombras
-
-#### RAMA A: Tirador de Precisión (Rango & Velocidad)
-* **T1 (Activo):** *Disparo Perforante* - Dispara una flecha de alta velocidad que atraviesa hasta 3 enemigos.
-* **T2 (Pasivo):** *Ojo del Rastreador* - Aumenta la distancia de visión y el daño infligido a enemigos lejanos en $+20\%$.
-* **T3 (Activo):** *Lluvia de Flechas Rúnicas* - Dispara al cielo para hacer caer una granizada de flechas sobre una zona.
-* **T4 (Pasivo):** *Munición Encantada* - Los ataques básicos tienen un $20\%$ de probabilidad de lanzar una flecha extra sin costo.
-* **T5 (Keystone):** *Disparo del Juicio Final* - Carga un disparo único atravesador de pantalla que inflige daño masivo en línea recta.
-
-#### RAMA B: Maestro de Trampas (Control & Daño Implícito)
-* **T1 (Activo):** *Trampa de Espinas Venenosas* - Coloca una trampa invisible en el suelo que inmoviliza y envenena al ser pisada.
-* **T2 (Pasivo):** *Ingeniería de Caza* - Permite tener hasta 3 trampas activas simultáneamente y reduce su tiempo de armado.
-* **T3 (Activo):** *Abrojos Elementales* - Esparce abrojos que ralentizan a los enemigos y les infligen sangrado.
-* **T4 (Pasivo):** *Reacción en Cadena* - La activación de una trampa tiene un $30\%$ de probabilidad de armar automáticamente otra trampa cercana.
-* **T5 (Keystone):** *Campo de Minas Rúnicas* - Cubre toda la zona circundante de explosivos mágicos que detonan en secuencia al entrar en combate.
-
-#### RAMA C: Acechador Fantasma (Sigilo & Agilidad)
-* **T1 (Activo):** *Capa de las Sombras* - Entra en sigilo absoluto durante 4 segundos. El primer ataque desde el sigilo es crítico garantizado.
-* **T2 (Pasivo):** *Pasos Silenciosos* - Aumenta la velocidad de movimiento mientras está en sigilo o de noche en $+30\%$.
-* **T3 (Activo):** *Abanico de Dagas Venenosas* - Lanza 5 dagas en cono frontal que aplican veneno acumulable.
-* **T4 (Pasivo):** *Asesino Oportunista* - Matar a un enemigo reduce el tiempo de recarga de *Capa de las Sombras* a cero.
-* **T5 (Keystone):** *Ejecución desde el Abismo* - Salta de sombra en sombra atacando a 5 objetivos aleatorios en menos de 1 segundo.
+* **Tier 1 (Req. Nivel 1) — Desbloquea Slot de Runa Activa:** el contenido del slot lo define la runa de Forma que el jugador craftee ahí (Soul-Crafting, Sección 3.4) — ej. equipado con Forma "Guadaña Espectral" + Modificador "Vampirismo" se comporta como la antigua *Danza de las Hojas Sombrías* (ráfaga de cortes giratorios, daño físico/sombra), pero es una de varias combinaciones posibles, no una habilidad fija.
+* **Tier 2 (Nodo Pasivo):** *Cuchillas Voraces* - Cura al Cosechador un $2\% + (1\% \times \text{Nivel})$ del daño infligido al asestar golpes críticos.
+* **Tier 3 (Req. 8 pts en rama) — Desbloquea Slot de Runa de Movilidad:** por defecto equivalente a *Paso Espectral* (teletransporte detrás del enemigo más cercano, invisibilidad 2s), pero craftable con otras combinaciones de Forma/Trigger de movilidad.
+* **Tier 4 (Nodo Pasivo):** *Seducción de la Oscuridad* - Incrementa la velocidad de ataque un $3\%$ por cada enemigo cercano afectado por sangrado.
+* **Tier 5 (Keystone, fijo — no modular):** *Frenesí de Almas Desatadas* - Estado de avatar sombrío por 10s: +40% Vel. Movimiento, Dash sin cooldown y ataques críticos garantizados.
 
 ---
 
 ## 6. Sistemas Endgame y Loop de Juego
 
 ### 6.1 Fisuras Rúnicas (Ancestral Rifts)
-Las Fisuras Rúnicas representan el contenido principal de endgame para probar builds de personajes:
+Las Fisuras Rúnicas representan el contenido principal de endgame para probar builds de personajes (inspirado en *Echoes of Mystralia*):
 * **Generación Procedural:** Algoritmos de Tilemaps aleatorios que combinan salas de mazmorras, pasillos de ruinas y hordas de monstruos.
 * **Modificadores de Fisura (Affixes):**
-  * *Suelo Magmático:* El mapa tiene zonas de lava periódicas.
-  * *Drenaje Rúnico:* El maná se drena un 2% por segundo.
-  * *Horda Enloquecida:* Los enemigos tienen +50% de velocidad de ataque.
-* **Medidor de Progresión:** Derrotar enemigos llena una barra de progreso. Al llegar al 100%, aparece el **Guardián de la Fisura** (Boss con mecánicas únicas).
+  * *Suelo Magmático:* Zonas de lava periódicas.
+  * *Drenaje Rúnico:* Maná se drena 2% por segundo.
+  * *Horda Enloquecida:* Enemigos con +50% de velocidad de ataque.
+* **Medidor de Progresión:** Derrotar enemigos llena la barra de fisura. Al llegar al 100%, aparece el **Guardián de la Fisura** (Boss con mecánicas únicas).
 
-### 6.2 Cacería de World Bosses 2D
-Los Jefes de Mundo están diseñados con patrones de telegrafiado claro en 2D Pixel Art:
-* **Telegrafiado Rojo (Indicator System):** Áreas rojas transparentes en la cuadrícula que alertan al jugador 1.5 segundos antes de un ataque masivo.
+### 6.2 Cacería de World Bosses 2D (restaurada — objetivo del Hito 11+, ver Sección 9)
+* **Telegrafiado Rojo (Indicator System):** Áreas rojas transparentes que alertan al jugador 1.5s antes de un ataque masivo.
 * **Fases del Boss:** Al llegar al 50% de vida, el boss cambia de color (Shader Tint), desbloquea nuevos ataques de área y entra en frenesí.
-
 ```
        [ Fase 1: Ataques Básicos y Embestidas ]
                           │
@@ -381,20 +307,20 @@ Los Jefes de Mundo están diseñados con patrones de telegrafiado claro en 2D Pi
                           ▼
        [ Fase 3: Telegrafiados Rojos Masivos & Lluvia de Proyectiles ]
 ```
-
-### 6.3 Forja y Transmutación Rúnica
-* **Extracción de Runas:** Permite destruir un objeto rúnico para recuperar sus gemas/runas engastadas.
-* **Re-Roll de Afijos:** Consumir *Esencia de Alma* en la forja para volver a tirar los valores numéricos de los prefijos/sufijos de un equipo legendario.
+* **Primer candidato concreto:** un Treant reescalado (2x tamaño actual, más HP, ataque de área en vez de golpe simple) — reusa el sprite/enemigo ya construido en vez de requerir arte nuevo, coherente con el criterio de alcance de la Sección 5 de `REAPER_DIRECTION_ANALYSIS.md`.
 
 ---
 
 ## 7. Arquitectura Técnica de Código en Godot 4.x
 
 ### 7.1 Estructura de Componentes en GDScript
-El proyecto se desarrollará utilizando una arquitectura modular guiada por señales (`Signal`) y `Resource`s personalizados, con Autoloads (Singletons) para los sistemas globales.
 
 ```
 res://
+├── docs/
+│   ├── GDD_Las_Cronicas_de_Reaper_2D_PixelArt_ARPG.md # Documento Maestro de Diseño
+│   ├── ECHOES_OF_MYSTRALIA_ANALYSIS.md                # Análisis estratégico de Mystralia
+│   └── REAPER_DIRECTION_ANALYSIS.md                   # Resolución de tensiones Skill Tree vs Soul-Crafting, roadmap
 ├── autoloads/
 │   ├── game_manager.gd            # Autoload: estado global de partida
 │   └── sound_manager.gd           # Autoload: música y SFX
@@ -405,9 +331,11 @@ res://
 │   │   ├── hitbox.gd
 │   │   ├── hurtbox.gd
 │   │   ├── health_system.gd
+│   │   ├── rune_spell_builder.gd  # Gestor de Soul-Crafting dinámico
 │   │   └── soul_harvest_manager.gd
 │   ├── data/
 │   │   ├── attack_data.gd         # class_name AttackData (Resource)
+│   │   ├── rune_data.gd           # class_name RuneData (Resource)
 │   │   ├── stat_system.gd         # class_name StatSystem (Node)
 │   │   ├── skill_node_data.gd     # class_name SkillNodeData (Resource)
 │   │   └── item_data.gd           # class_name ItemData (Resource)
@@ -424,49 +352,12 @@ res://
 │   └── levels/
 ├── resources/
 │   ├── attacks/                   # instancias .tres de AttackData
+│   ├── runes/                     # instancias .tres de RuneData (Soul-Crafting)
 │   ├── items/                     # instancias .tres de ItemData
 │   └── skills/                    # instancias .tres de SkillNodeData
 └── art/
     ├── sprites/
-    │   ├── characters/
-    │   ├── enemies/
-    │   └── tilemaps/
-    └── shaders/
-        ├── sprite_flash.gdshader
-        └── pixel_outline.gdshader
-```
-
-### 7.2 Script de Ejemplo: Gestor de Stats del Personaje (`stat_system.gd`)
-```gdscript
-# scripts/data/stat_system.gd
-extends Node
-class_name StatSystem
-
-signal stats_recalculated
-
-@export_group("Atributos Base")
-@export var strength: int = 10
-@export var agility: int = 10
-@export var intelligence: int = 10
-@export var vigor: int = 10
-@export var runic_affinity: int = 10
-
-@export_group("Valores Calculados", "")
-var max_health: float
-var physical_damage: float
-var crit_chance: float
-var cooldown_reduction: float
-
-func _ready() -> void:
-    recalculate_stats()
-
-func recalculate_stats() -> void:
-    max_health = 100.0 + (vigor * 15.0)
-    physical_damage = 10.0 + (strength * 2.0)
-    crit_chance = 5.0 + (agility * 0.25)
-    cooldown_reduction = clamp(runic_affinity * 0.0035, 0.0, 0.40)
-
-    stats_recalculated.emit()
+    ├── shaders/
 ```
 
 ---
@@ -474,39 +365,26 @@ func recalculate_stats() -> void:
 ## 8. Buenas Prácticas e Insights de Desarrolladores (Game Dev Forums)
 
 ### 8.1 Game Juice (Retroalimentación Visual y Táctil)
-Basado en consensos de r/gamedev y charlas GDC de referentes 2D:
-
-1. **Hitstop / Micro-Pausas (Freeze Frames):**
-   * Al asestar un golpe crítico o un ataque pesado, la escala de tiempo (`Time.timeScale`) se congela a `0.0f` durante **2 a 4 frames** (0.03 a 0.06 segundos). Esto genera una sensación física de resistencia e impacto masivo.
-2. **Screen Shake Direccional:**
-   * La cámara tiembla en la dirección opuesta al vector del impacto. El temblor utiliza perfiles de ruido de Perlin (*Cinemachine Impulse Listener* o script de cámara propio) para evitar mareos visuales.
-3. **Flashing de Daño (Hit Flash Shader):**
-   * Todo sprite blanco se vuelve completamente blanco uniforme durante 1 frame tras ser impactado.
-4. **Números de Daño Flotantes (Floating Combat Text):**
-   * Números emergentes en tipografía Pixel Art. Los golpes normales se muestran en blanco/amarillo pequeño; los golpes críticos se muestran en dorado/rojo gigante con animación de rebote (Bounce scale).
-
-### 8.2 Principios de Diseño de Interfaz (UI/UX) en Resoluciones Pixel Art
-* **Fuentes Pixel-Art Nativas:** Uso de tipografías diseñadas específicamente para rejillas de píxeles sin aliasing (ej. *Crisp Pixel Font*). Evitar fuentes vectoriales suaves escaladas hacia abajo.
-* **Iconografía Clara para Árboles de Habilidades:**
-  * Siluetas legibles a 24x24 o 32x32 píxeles con paleta de colores distintiva:
-    * **Rojo:** Habilidades Físicas/Cuerpo a Cuerpo.
-    * **Azul/Violeta:** Habilidades Mágicas/Rúnicas.
-    * **Verde:** Agilidad/Veno/Trampas.
-    * **Dorado:** Hitos Maestros (Keystones).
+1. **Hitstop / Micro-Pausas (Freeze Frames):** Congela `Time.timeScale` a `0.0f` durante 2 a 4 frames (0.03s a 0.06s) en impactos pesados o críticos.
+2. **Screen Shake Direccional:** La cámara tiembla en la dirección opuesta al impacto mediante perfiles de ruido Perlin.
+3. **Flashing de Daño (Hit Flash Shader):** El sprite se vuelve blanco uniforme durante 1 frame tras recibir daño.
+4. **Números de Daño Flotantes (Floating Combat Text):** Números emergentes con tipografía limpia y rebote visual para críticos.
 
 ---
 
 ## 9. Próximas Etapas de Desarrollo (Hoja de Ruta)
 
-- [x] **Hito 1:** Documento Maestro de Diseño 2D ARPG completado (`GDD_Las_Cronicas_de_Reaper_2D_PixelArt_ARPG.md`).
-- [x] **Hito 1.5:** Pivot de motor: arquitectura técnica migrada de Unity URP 2D a **Godot 4.x** (Secciones 2.2, 3.1 y 7).
-- [x] **Hito 2:** Configuración del proyecto Godot (Viewport 1280x720, escalado fraccional, estructura de carpetas, Autoloads base y shader de Hit Flash).
-- [x] **Hito 2.5:** Pivot de dirección de arte: de Pixel Art de grilla baja a estilo pintado/chibi de alta resolución (ver imagen de referencia y Secciones 1.2, 1.4, 2.1, 2.2).
-- [x] **Hito 2.6:** Entorno de prueba (bosque + ruina con muros/puerta/cueva) poblado con enemigos placeholder (Mole, Treant), usando assets CC0 descargados (`art/ASSETS_SOURCES.md`).
-- [x] **Hito 3 (Vertical Slice):** Loop mínimo jugable de punta a punta — Player ataca con Hitbox real (`AttackData` "Corte Básico"), el daño usa la fórmula StatSystem-atacante × multiplicador de ataque, el enemigo muere (`HealthSystem.died`) y suelta un Orbe de Alma que vuela hacia el jugador y se acredita en `SoulHarvestManager` (autoload), y el HUD (`scenes/ui/hud.tscn`) refleja Vida y Medidor de Almas en vivo.
-- [x] **Hito 4:** IA de persecución/ataque en `Enemy` (Mole/Treant persiguen dentro de `detection_radius`, atacan con su propio Hitbox/AttackData en `attack_range`). Player recibe daño real (Hurtbox ya no es puramente defensivo) y reinicia el nivel al morir (`HealthSystem.died`).
-- [x] **Hito 4.5:** Mundo infinito por chunks (`ChunkManager`) — bosque generado proceduralmente (semilla determinística por coordenada de chunk) alrededor del jugador en una grilla 3x3, cargando/descargando a medida que se mueve, para que nunca se llegue a un borde vacío. La sala inicial (ruina) es un chunk fijo en (0,0) que nunca se regenera. Sumados 2 Mole y 1 Treant más a la sala inicial.
-- [x] **Hito 4.6:** Piso agregado a los chunks de bosque generados por `ChunkManager` (antes solo se veía el color de fondo plano fuera de la ruina).
-- [x] **Hito 5:** Animaciones reales del Player (Idle/Walk/Attack x Front/Back/Side, con flip_h para izquierda) reemplazando el `PlaceholderVisual` — sprite del héroe arquero del mismo pack CC0, vía `AnimatedSprite2D` + `hero_sprite_frames.tres`. Pendiente afinar: el Hitbox sigue activándose por timer fijo en vez de un Call Method Track sincronizado a los 3 frames reales de la animación de ataque.
-- [x] **Hito 6:** UI del Árbol de Habilidades (tecla **K** para abrir/cerrar) — Rama A completa del Cosechador (Sombras, 5 tiers) como `SkillNodeData` reales (`resources/skills/`), con `SkillTreeManager` (autoload) validando puntos disponibles y el umbral `required_points_in_branch` de cada tier antes de permitir invertir. Placeholder: `available_points` arranca en 5 fijo — todavía no hay sistema de XP/subida de nivel que otorgue puntos de verdad, y solo está implementada 1 de las 12 ramas del GDD (las otras 11 son trabajo de contenido, no de sistema).
-- [ ] **Hito 7:** Persistencia de chunks — que los enemigos muertos y el estado del chunk no se reseteen al descargar/recargar (actualmente cada chunk se regenera desde cero con la misma semilla, así que los enemigos "resucitan" si volvés a visitarlo).
+- [x] **Hito 1:** Documento Maestro de Diseño 2D ARPG completado (`docs/GDD_Las_Cronicas_de_Reaper_2D_PixelArt_ARPG.md`).
+- [x] **Hito 1.5:** Pivot de motor: arquitectura técnica migrada a **Godot 4.x**.
+- [x] **Hito 2:** Configuración del proyecto Godot (Viewport 1280x720, escalado fraccional, Autoloads base y Hit Flash shader).
+- [x] **Hito 2.5:** Pivot de dirección de arte a estilo pintado/chibi de alta resolución (Secciones 1.4 y 2.1).
+- [x] **Hito 3 (Vertical Slice):** Loop mínimo jugable — Ataque con Hitbox real, daño calculado vía StatSystem, muerte de enemigo y recolección de Orbes de Alma al HUD.
+- [x] **Hito 4:** IA de persecución/ataque en `Enemy` y daño real sobre el Player.
+- [x] **Hito 5:** Animaciones reales del Player (`AnimatedSprite2D` + `hero_sprite_frames.tres`).
+- [x] **Hito 6:** UI del Árbol de Habilidades (tecla **K**) con validación de puntos y dependencias de nodos.
+- [x] **Hito 6.5:** Organización de documentación en `docs/` e integración del **Sistema de Forja Rúnica de Almas (Soul-Crafting)** inspirado en *Echoes of Mystralia*. Resuelta la tensión de diseño con el Skill Tree (`REAPER_DIRECTION_ANALYSIS.md`, 2026-08-11): Skill Tree = poder pasivo + slots, Soul-Crafting = contenido de esos slots.
+- [ ] **Hito 7:** `RuneData` (Resource) + 3 Runas de Forma + 2 de Modificador + 2 de Trigger reales (`resources/runes/`) + `RuneSpellBuilder` que compone un `AttackData` temporal a partir de 1-3 runas equipadas. Sin UI todavía — probado por escena de debug antes de invertir en interfaz.
+- [ ] **Hito 8:** Altar de Almas (UI) — gastar Esencia de Alma (`SoulHarvestManager`) para desbloquear runas y equiparlas en los Slots de Runa Activa/Movilidad (Tier 1 y Tier 3 del Skill Tree, Sección 5.1).
+- [ ] **Hito 9:** Persistencia de estado de Chunks y enemigos derrotados (el "Hito 7" original antes de esta actualización de roadmap).
+- [ ] **Hito 10:** Segundo tipo de enemigo con ataque a distancia — variedad de amenaza antes de variedad de clases.
+- [ ] **Hito 11+:** Primer World Boss (telegrafiado + fases, Sección 6.2), usando Treant reescalado como base — primer objetivo de "final" del vertical slice.
