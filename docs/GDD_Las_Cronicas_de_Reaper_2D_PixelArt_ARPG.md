@@ -387,6 +387,6 @@ res://
 - [ ] **Hito 7:** `RuneData` (Resource) + 3 Runas de Forma + 2 de Modificador + 2 de Trigger reales (`resources/runes/`) + `RuneSpellBuilder` que compone un `AttackData` temporal a partir de 1-3 runas equipadas. Sin UI todavía — probado por escena de debug antes de invertir en interfaz.
 - [ ] **Hito 8:** Altar de Almas (UI) — gastar Esencia de Alma (`SoulHarvestManager`) para desbloquear runas y equiparlas en los Slots de Runa Activa/Movilidad (Tier 1 y Tier 3 del Skill Tree, Sección 5.1).
 - [ ] **Hito 9:** Persistencia de estado de Chunks y enemigos derrotados (el "Hito 7" original antes de esta actualización de roadmap).
-- [ ] **Hito 10:** Tiers de peligro por distancia al spawn + variante Élite (tintado, sin arte nuevo) — ver `docs/ENEMY_AND_BOSS_PROGRESSION_PLAN.md`.
+- [x] **Hito 10:** Tiers de peligro por distancia al spawn + variante Élite (tintado, sin arte nuevo) — `ChunkManager._danger_tier()` escala HP (`Enemy.power_multiplier`) y daño de salida (`Hurtbox.receive_hit`) de enemigos generados proceduralmente; los enemigos de la sala inicial quedan en Tier 0 sin cambios. Ver `docs/ENEMY_AND_BOSS_PROGRESSION_PLAN.md`.
 - [ ] **Hito 11:** `TelegraphArea` + Boss Chunks determinísticos + primer World Boss "Treant Ancestral" (6x escala, 900 HP, 3 fases) — mismo documento, Sección 3.
 - [ ] **Hito 12:** Segundo tipo de enemigo con ataque a distancia — variedad de amenaza antes de variedad de clases.

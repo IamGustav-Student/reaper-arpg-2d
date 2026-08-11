@@ -26,6 +26,11 @@ const BUSH_TEXTURES := [
 const ROCK_TEXTURE := "res://art/environment/tiny_rpg_forest/sliced-objects/rock.png"
 const FLOOR_TEXTURE := "res://art/environment/tiny_rpg_forest/ruins/floor_dirt.png"
 
+## Tiers de peligro por distancia (Chebyshev) al chunk (0,0) — la ruina.
+## Ver docs/ENEMY_AND_BOSS_PROGRESSION_PLAN.md sección 2.
+const TIER_STAT_MULTIPLIER := [1.0, 1.0, 1.5, 2.2, 3.0]
+const TIER_ELITE_CHANCE := [0.0, 0.0, 0.15, 0.30, 0.45]
+
 var _enemy_scenes: Array[PackedScene] = [
 	preload("res://scenes/enemies/mole.tscn"),
 	preload("res://scenes/enemies/treant.tscn"),
@@ -67,9 +72,23 @@ func _update_chunks(current_chunk: Vector2i) -> void:
 func _world_to_chunk(world_pos: Vector2) -> Vector2i:
 	return Vector2i(floori(world_pos.x / CHUNK_SIZE), floori(world_pos.y / CHUNK_SIZE))
 
+func _danger_tier(coord: Vector2i) -> int:
+	var distance := maxi(absi(coord.x), absi(coord.y))
+	if distance <= 1:
+		return 0
+	elif distance <= 3:
+		return 1
+	elif distance <= 6:
+		return 2
+	elif distance <= 10:
+		return 3
+	else:
+		return 4
+
 func _generate_forest_chunk(coord: Vector2i) -> Node2D:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(coord)
+	var tier := _danger_tier(coord)
 
 	var chunk := Node2D.new()
 	chunk.name = "Chunk_%d_%d" % [coord.x, coord.y]
@@ -95,8 +114,10 @@ func _generate_forest_chunk(coord: Vector2i) -> Node2D:
 	for i in rng.randi_range(1, 3):
 		var local_pos := Vector2(rng.randf_range(-half, half), rng.randf_range(-half, half))
 		var enemy_scene: PackedScene = _enemy_scenes[rng.randi_range(0, _enemy_scenes.size() - 1)]
-		var enemy: Node2D = enemy_scene.instantiate()
+		var enemy: Enemy = enemy_scene.instantiate()
 		enemy.position = local_pos
+		enemy.power_multiplier = TIER_STAT_MULTIPLIER[tier]
+		enemy.is_elite = rng.randf() < TIER_ELITE_CHANCE[tier]
 		chunk.add_child(enemy)
 
 	return chunk

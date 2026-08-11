@@ -13,6 +13,12 @@ class_name Enemy
 @export var attack_cooldown: float = 1.5
 @export var attack_duration: float = 0.2
 
+## Escala HP y daño de salida (GDD: tiers de peligro por distancia al spawn,
+## ver docs/ENEMY_AND_BOSS_PROGRESSION_PLAN.md). ChunkManager lo setea antes
+## de add_child(); Hurtbox lo lee en receive_hit() para el daño de este enemigo.
+@export var power_multiplier: float = 1.0
+@export var is_elite: bool = false
+
 @onready var health_system: HealthSystem = $HealthSystem
 @onready var hitbox: Hitbox = $Hitbox
 
@@ -23,6 +29,16 @@ var _is_attacking: bool = false
 
 func _ready() -> void:
 	health_system.died.connect(_on_died)
+	_apply_power_and_elite_modifiers()
+
+func _apply_power_and_elite_modifiers() -> void:
+	if is_elite:
+		power_multiplier *= 2.0
+		scale *= 1.3
+		modulate = Color(0.6, 0.1, 0.5)
+
+	health_system.max_health *= power_multiplier
+	health_system.current_health = health_system.max_health
 
 func _physics_process(delta: float) -> void:
 	# Búsqueda perezosa en vez de una sola vez en _ready(): Player y los

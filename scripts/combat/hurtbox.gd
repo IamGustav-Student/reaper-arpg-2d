@@ -33,6 +33,8 @@ func receive_hit(attack_data: AttackData, source: Node) -> void:
 	if source and source.has_node("StatSystem"):
 		var attacker_stats: StatSystem = source.get_node("StatSystem")
 		attacker_physical_damage = attacker_stats.physical_damage
+	elif source is Enemy:
+		attacker_physical_damage *= source.power_multiplier
 
 	var damage := attack_data.base_damage_multiplier * attacker_physical_damage
 	health_system.take_damage(damage)
