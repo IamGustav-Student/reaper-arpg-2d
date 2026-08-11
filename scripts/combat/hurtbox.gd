@@ -39,3 +39,19 @@ func receive_hit(attack_data: AttackData, source: Node) -> void:
 	var damage := attack_data.base_damage_multiplier * attacker_physical_damage
 	health_system.take_damage(damage)
 	damage_received.emit(damage, source)
+
+	# Runa de Modificador "Sed de Sangre" (Soul-Crafting, GDD 3.4): cura al
+	# atacante un % del daño infligido.
+	if attack_data.lifesteal_percent > 0.0 and source and source.has_node("HealthSystem"):
+		var attacker_health: HealthSystem = source.get_node("HealthSystem")
+		attacker_health.heal(damage * attack_data.lifesteal_percent)
+
+	# Runa de Modificador "Ceniza de Sombra": daño adicional por tiempo.
+	if attack_data.dot_damage_per_tick > 0.0 and attack_data.dot_tick_count > 0:
+		_apply_dot(attack_data.dot_damage_per_tick, attack_data.dot_tick_count, attack_data.dot_tick_interval)
+
+func _apply_dot(damage_per_tick: float, tick_count: int, tick_interval: float) -> void:
+	for i in tick_count:
+		await get_tree().create_timer(tick_interval).timeout
+		if health_system and is_instance_valid(health_system) and health_system.current_health > 0.0:
+			health_system.take_damage(damage_per_tick)

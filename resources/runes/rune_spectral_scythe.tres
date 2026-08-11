@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="RuneData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/rune_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+rune_name = "Guadaña Espectral"
+description = "Forma de barrido amplio: más alcance y empuje que el Tajo Giro, a costa de nada de daño extra."
+category = 0
+damage_multiplier_delta = 0.3
+knockback_delta = 3.0
+hitbox_radius_multiplier = 1.6

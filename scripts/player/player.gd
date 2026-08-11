@@ -14,6 +14,7 @@ class_name Player
 
 @export var attack_duration: float = 0.25     # 3 frames de ataque a 12 fps
 @export var attack_range_offset: float = 26.0
+@export var base_attack_data: AttackData = preload("res://resources/attacks/basic_sword.tres")
 
 @onready var hurtbox: Hurtbox = $Hurtbox
 @onready var stats: StatSystem = $StatSystem
@@ -95,10 +96,14 @@ func _process_dash(delta: float) -> void:
 		_is_dashing = false
 		hurtbox.set_invulnerable(false)
 
+## Craftea el ataque real a partir de lo que esté equipado en el Slot Activo
+## (Soul-Crafting, GDD 3.4 / Hito 8). Sin runas equipadas, se comporta
+## exactamente igual que antes (usa base_attack_data sin cambios).
 func _start_attack() -> void:
 	_is_attacking = true
 	_attack_timer = attack_duration
 	hitbox.position = _dash_direction * attack_range_offset
+	hitbox.attack_data = RuneAltarManager.get_composed_attack_data(base_attack_data, "active")
 	hitbox.set_active(true)
 
 	animated_sprite.flip_h = _dash_direction.x < 0

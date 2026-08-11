@@ -37,6 +37,7 @@ const BOSS_CHUNK_MODULO := 7  # 1 de cada 7 chunks elegibles (distancia >= 5) es
 var _enemy_scenes: Array[PackedScene] = [
 	preload("res://scenes/enemies/mole.tscn"),
 	preload("res://scenes/enemies/treant.tscn"),
+	preload("res://scenes/enemies/ranged_enemy.tscn"),
 ]
 var _boss_scene: PackedScene = preload("res://scenes/enemies/boss_treant.tscn")
 

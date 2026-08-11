@@ -18,16 +18,35 @@ const MASK_HURTBOX := 1 << 2   # detecta la capa "Hurtbox" (ver project.godot [l
 
 var _active: bool = false
 var _hit_targets_this_swing: Array[Hurtbox] = []
+var _base_radius: float = -1.0
+var _circle_shape_node: CollisionShape2D
 
 func _ready() -> void:
 	monitoring = true
 	collision_mask = MASK_HURTBOX
 	area_entered.connect(_on_area_entered)
+	for child in get_children():
+		if child is CollisionShape2D and child.shape is CircleShape2D:
+			_circle_shape_node = child
+			_base_radius = child.shape.radius
+			break
 
 func set_active(value: bool) -> void:
 	_active = value
 	if value:
 		_hit_targets_this_swing.clear()
+		_apply_radius_override()
+
+## Las Runas de Forma (Soul-Crafting, GDD 3.4) pueden pedir un hitbox más
+## grande/chico vía attack_data.hitbox_radius_multiplier. Siempre se calcula
+## desde _base_radius (el radio original del .tscn), nunca desde el radio
+## actual — si no, cada activación agrandaría el círculo de nuevo.
+func _apply_radius_override() -> void:
+	if _circle_shape_node == null or attack_data == null or attack_data.hitbox_radius_multiplier == 1.0:
+		return
+	var new_shape := CircleShape2D.new()
+	new_shape.radius = _base_radius * attack_data.hitbox_radius_multiplier
+	_circle_shape_node.shape = new_shape
 
 func _physics_process(_delta: float) -> void:
 	if not _active:

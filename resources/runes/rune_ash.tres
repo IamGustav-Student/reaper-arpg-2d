@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="RuneData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/rune_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+rune_name = "Ceniza de Sombra"
+description = "Modificador de Alma: deja al objetivo ardiendo con ceniza espectral, infligiendo daño adicional durante unos segundos."
+category = 1
+applies_dot = true
