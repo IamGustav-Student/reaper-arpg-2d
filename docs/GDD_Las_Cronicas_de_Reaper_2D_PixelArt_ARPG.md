@@ -295,7 +295,7 @@ Las Fisuras Rúnicas representan el contenido principal de endgame para probar b
   * *Horda Enloquecida:* Enemigos con +50% de velocidad de ataque.
 * **Medidor de Progresión:** Derrotar enemigos llena la barra de fisura. Al llegar al 100%, aparece el **Guardián de la Fisura** (Boss con mecánicas únicas).
 
-### 6.2 Cacería de World Bosses 2D (restaurada — objetivo del Hito 11+, ver Sección 9)
+### 6.2 Cacería de World Bosses 2D (restaurada — objetivo del Hito 11, ver Sección 9 y `docs/ENEMY_AND_BOSS_PROGRESSION_PLAN.md` para los números concretos del primer boss y la curva de dificultad de enemigos comunes)
 * **Telegrafiado Rojo (Indicator System):** Áreas rojas transparentes que alertan al jugador 1.5s antes de un ataque masivo.
 * **Fases del Boss:** Al llegar al 50% de vida, el boss cambia de color (Shader Tint), desbloquea nuevos ataques de área y entra en frenesí.
 ```
@@ -320,7 +320,8 @@ res://
 ├── docs/
 │   ├── GDD_Las_Cronicas_de_Reaper_2D_PixelArt_ARPG.md # Documento Maestro de Diseño
 │   ├── ECHOES_OF_MYSTRALIA_ANALYSIS.md                # Análisis estratégico de Mystralia
-│   └── REAPER_DIRECTION_ANALYSIS.md                   # Resolución de tensiones Skill Tree vs Soul-Crafting, roadmap
+│   ├── REAPER_DIRECTION_ANALYSIS.md                   # Resolución de tensiones Skill Tree vs Soul-Crafting, roadmap
+│   └── ENEMY_AND_BOSS_PROGRESSION_PLAN.md             # Tiers de peligro, variantes Élite y primer World Boss
 ├── autoloads/
 │   ├── game_manager.gd            # Autoload: estado global de partida
 │   └── sound_manager.gd           # Autoload: música y SFX
@@ -386,5 +387,6 @@ res://
 - [ ] **Hito 7:** `RuneData` (Resource) + 3 Runas de Forma + 2 de Modificador + 2 de Trigger reales (`resources/runes/`) + `RuneSpellBuilder` que compone un `AttackData` temporal a partir de 1-3 runas equipadas. Sin UI todavía — probado por escena de debug antes de invertir en interfaz.
 - [ ] **Hito 8:** Altar de Almas (UI) — gastar Esencia de Alma (`SoulHarvestManager`) para desbloquear runas y equiparlas en los Slots de Runa Activa/Movilidad (Tier 1 y Tier 3 del Skill Tree, Sección 5.1).
 - [ ] **Hito 9:** Persistencia de estado de Chunks y enemigos derrotados (el "Hito 7" original antes de esta actualización de roadmap).
-- [ ] **Hito 10:** Segundo tipo de enemigo con ataque a distancia — variedad de amenaza antes de variedad de clases.
-- [ ] **Hito 11+:** Primer World Boss (telegrafiado + fases, Sección 6.2), usando Treant reescalado como base — primer objetivo de "final" del vertical slice.
+- [ ] **Hito 10:** Tiers de peligro por distancia al spawn + variante Élite (tintado, sin arte nuevo) — ver `docs/ENEMY_AND_BOSS_PROGRESSION_PLAN.md`.
+- [ ] **Hito 11:** `TelegraphArea` + Boss Chunks determinísticos + primer World Boss "Treant Ancestral" (6x escala, 900 HP, 3 fases) — mismo documento, Sección 3.
+- [ ] **Hito 12:** Segundo tipo de enemigo con ataque a distancia — variedad de amenaza antes de variedad de clases.
