@@ -6,10 +6,9 @@ extends Node2D
 ##
 ## Cada chunk se siembra con hash(coord) como semilla, así que si el
 ## jugador se aleja y vuelve, el chunk se regenera con el MISMO layout
-## (determinístico) — pero los enemigos vuelven a aparecer aunque ya los
-## hayas matado, ya que no se persiste el estado entre descargas. Aceptable
-## para esta etapa; una versión futura podría llevar registro de qué
-## chunks/enemigos ya se "limpiaron".
+## (determinístico). Qué enemigos/bosses de ese layout ya se mataron se
+## consulta en GameManager (Hito 9) por índice de spawn (el índice también
+## es determinístico dada la semilla), así que no reaparecen.
 
 const CHUNK_SIZE := 1200.0
 const LOAD_RADIUS := 1  # grilla de (2*LOAD_RADIUS+1)^2 chunks cargados
@@ -125,23 +124,30 @@ func _generate_forest_chunk(coord: Vector2i) -> Node2D:
 			_spawn_rock(chunk, local_pos)
 
 	if _is_boss_chunk(coord):
-		_spawn_boss(chunk)
+		if not GameManager.is_boss_defeated(coord):
+			_spawn_boss(chunk, coord)
 	else:
 		for i in rng.randi_range(1, 3):
 			var local_pos := Vector2(rng.randf_range(-half, half), rng.randf_range(-half, half))
 			var enemy_scene: PackedScene = _enemy_scenes[rng.randi_range(0, _enemy_scenes.size() - 1)]
+			var enemy_power: float = TIER_STAT_MULTIPLIER[tier]
+			var enemy_is_elite: bool = rng.randf() < TIER_ELITE_CHANCE[tier]
+			if GameManager.is_enemy_killed(coord, i):
+				continue  # ya lo matamos en una visita anterior a este chunk
 			var enemy: Enemy = enemy_scene.instantiate()
 			enemy.position = local_pos
-			enemy.power_multiplier = TIER_STAT_MULTIPLIER[tier]
-			enemy.is_elite = rng.randf() < TIER_ELITE_CHANCE[tier]
+			enemy.power_multiplier = enemy_power
+			enemy.is_elite = enemy_is_elite
 			chunk.add_child(enemy)
+			enemy.health_system.died.connect(GameManager.mark_enemy_killed.bind(coord, i))
 
 	return chunk
 
-func _spawn_boss(chunk: Node2D) -> void:
-	var boss: Node2D = _boss_scene.instantiate()
+func _spawn_boss(chunk: Node2D, coord: Vector2i) -> void:
+	var boss: Enemy = _boss_scene.instantiate()
 	boss.position = Vector2.ZERO
 	chunk.add_child(boss)
+	boss.health_system.died.connect(GameManager.mark_boss_defeated.bind(coord))
 
 func _spawn_floor(chunk: Node2D, half: float) -> void:
 	var floor_rect := TextureRect.new()
