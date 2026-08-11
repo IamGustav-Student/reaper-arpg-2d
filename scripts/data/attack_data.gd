@@ -22,3 +22,4 @@ enum ElementType { PHYSICAL, FIRE, FROST, SHADOW }
 @export var dot_damage_per_tick: float = 0.0
 @export var dot_tick_count: int = 0
 @export var dot_tick_interval: float = 1.0
+@export var is_projectile: bool = false

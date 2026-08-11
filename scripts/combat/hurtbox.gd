@@ -25,14 +25,20 @@ func set_invulnerable(value: bool) -> void:
 
 ## Llamado por Hitbox.gd al detectar solapamiento. Combina el daño físico del
 ## StatSystem del atacante (si tiene uno) con el multiplicador del ataque.
-func receive_hit(attack_data: AttackData, source: Node) -> void:
+## Devuelve true si el golpe fue crítico (Hitbox lo usa para disparar la
+## Runa de Desencadenante "Al Asestar Crítico", GDD 3.4 / Hito 13).
+func receive_hit(attack_data: AttackData, source: Node) -> bool:
 	if health_system == null:
-		return
+		return false
 
 	var attacker_physical_damage := 10.0  # fallback si el atacante no tiene StatSystem
+	var is_crit := false
 	if source and source.has_node("StatSystem"):
 		var attacker_stats: StatSystem = source.get_node("StatSystem")
 		attacker_physical_damage = attacker_stats.physical_damage
+		is_crit = randf() * 100.0 < attacker_stats.crit_chance
+		if is_crit:
+			attacker_physical_damage *= attacker_stats.crit_multiplier
 	elif source is Enemy:
 		attacker_physical_damage *= source.power_multiplier
 
@@ -49,6 +55,8 @@ func receive_hit(attack_data: AttackData, source: Node) -> void:
 	# Runa de Modificador "Ceniza de Sombra": daño adicional por tiempo.
 	if attack_data.dot_damage_per_tick > 0.0 and attack_data.dot_tick_count > 0:
 		_apply_dot(attack_data.dot_damage_per_tick, attack_data.dot_tick_count, attack_data.dot_tick_interval)
+
+	return is_crit
 
 func _apply_dot(damage_per_tick: float, tick_count: int, tick_interval: float) -> void:
 	for i in tick_count:

@@ -16,6 +16,12 @@ class_name Player
 @export var attack_range_offset: float = 26.0
 @export var base_attack_data: AttackData = preload("res://resources/attacks/basic_sword.tres")
 
+## Hito 13: Runas de Desencadenante (Soul-Crafting) casteadas fuera del
+## swing manual del Player — nunca reusan `hitbox` para no pisar su máquina
+## de estados de ataque (que puede estar activa o no cuando el trigger salta).
+const SPECTRAL_PROJECTILE_SCENE: PackedScene = preload("res://scenes/combat/spectral_projectile.tscn")
+const SPELL_BURST_SCENE: PackedScene = preload("res://scenes/combat/spell_burst.tscn")
+
 @onready var hurtbox: Hurtbox = $Hurtbox
 @onready var stats: StatSystem = $StatSystem
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -33,6 +39,7 @@ var _is_attacking: bool = false
 func _ready() -> void:
 	add_to_group("player")
 	health_system.died.connect(_on_died)
+	hitbox.critical_hit_landed.connect(_on_critical_hit_landed)
 
 ## Sin pantalla de game over todavía: reinicia el nivel al morir.
 func _on_died() -> void:
@@ -80,6 +87,12 @@ func _start_dash() -> void:
 	_dash_timer = 0.0
 	_dash_cooldown_timer = dash_cooldown
 
+	# Runa de Desencadenante "Al Esquivar" (Hito 13): si el Slot de Movilidad
+	# la tiene equipada, cada Dash también lanza lo que esté crafteado ahí.
+	if RuneAltarManager.has_dodge_trigger("mobility"):
+		var composed := RuneAltarManager.get_composed_attack_data(base_attack_data, "mobility")
+		_cast_trigger_spell(composed, _dash_direction)
+
 func _process_dash(delta: float) -> void:
 	_dash_timer += delta
 	var t := _dash_timer / dash_duration
@@ -98,16 +111,59 @@ func _process_dash(delta: float) -> void:
 
 ## Craftea el ataque real a partir de lo que esté equipado en el Slot Activo
 ## (Soul-Crafting, GDD 3.4 / Hito 8). Sin runas equipadas, se comporta
-## exactamente igual que antes (usa base_attack_data sin cambios).
+## exactamente igual que antes (usa base_attack_data sin cambios). Si la
+## Runa de Forma "Proyectil Espectral" está equipada (Hito 13), el golpe se
+## lanza a distancia en vez de activar el Hitbox cuerpo a cuerpo del Player.
 func _start_attack() -> void:
 	_is_attacking = true
 	_attack_timer = attack_duration
-	hitbox.position = _dash_direction * attack_range_offset
-	hitbox.attack_data = RuneAltarManager.get_composed_attack_data(base_attack_data, "active")
-	hitbox.set_active(true)
-
 	animated_sprite.flip_h = _dash_direction.x < 0
 	animated_sprite.play("attack_" + _facing_from_direction(_dash_direction))
+
+	var composed := RuneAltarManager.get_composed_attack_data(base_attack_data, "active")
+	if composed.is_projectile:
+		_fire_projectile_spell(composed, _dash_direction)
+	else:
+		hitbox.position = _dash_direction * attack_range_offset
+		hitbox.attack_data = composed
+		hitbox.set_active(true)
+
+## Runa de Desencadenante "Al Asestar Crítico" (Hito 13): si el Slot Activo
+## la tiene equipada, cada crítico conectado con el ataque manual relanza lo
+## crafteado ahí. No puede recursar: el relanzamiento usa un SpellBurst/
+## Projectile suelto (nunca `hitbox`), así que su propio critical_hit_landed
+## no está conectado a nada.
+##
+## Este signal puede llegar desde Hitbox._on_area_entered, que corre DENTRO
+## del flush de queries del motor de físicas — instanciar/add_child ahí
+## revienta con "Can't change this state while flushing queries". Se difiere
+## un frame con call_deferred para que corra fuera de ese callback.
+func _on_critical_hit_landed(_hurtbox: Hurtbox) -> void:
+	if not RuneAltarManager.has_crit_trigger("active"):
+		return
+	var composed := RuneAltarManager.get_composed_attack_data(base_attack_data, "active")
+	call_deferred("_cast_trigger_spell", composed, _dash_direction)
+
+## Hechizo casteado por una Runa de Desencadenante (Dash/Crítico), nunca por
+## input manual: siempre un nodo suelto (SpellBurst o Projectile), para no
+## interferir con la máquina de estados de ataque/dash del Player.
+func _cast_trigger_spell(attack_data: AttackData, direction: Vector2) -> void:
+	if attack_data.is_projectile:
+		_fire_projectile_spell(attack_data, direction)
+	else:
+		var burst: SpellBurst = SPELL_BURST_SCENE.instantiate()
+		burst.attack_data = attack_data
+		burst.source_override = self
+		get_parent().add_child(burst)
+		burst.global_position = global_position + direction * attack_range_offset
+
+func _fire_projectile_spell(attack_data: AttackData, direction: Vector2) -> void:
+	var projectile: Projectile = SPECTRAL_PROJECTILE_SCENE.instantiate()
+	projectile.attack_data = attack_data
+	projectile.direction = direction
+	projectile.source_override = self
+	get_parent().add_child(projectile)
+	projectile.global_position = global_position + direction * attack_range_offset
 
 func _update_animation(is_moving: bool) -> void:
 	animated_sprite.flip_h = _dash_direction.x < 0

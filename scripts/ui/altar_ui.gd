@@ -7,6 +7,7 @@ const RUNES: Array[RuneData] = [
 	preload("res://resources/runes/rune_slash_spin.tres"),
 	preload("res://resources/runes/rune_spectral_scythe.tres"),
 	preload("res://resources/runes/rune_nova.tres"),
+	preload("res://resources/runes/rune_spectral_projectile.tres"),
 	preload("res://resources/runes/rune_bloodthirst.tres"),
 	preload("res://resources/runes/rune_ash.tres"),
 	preload("res://resources/runes/rune_on_dodge.tres"),

@@ -11,10 +11,18 @@ class_name Hitbox
 ## _active es true, se revisan las áreas solapadas en cada _physics_process.
 
 signal hit_landed(hurtbox: Hurtbox)
+signal critical_hit_landed(hurtbox: Hurtbox)
 
 const MASK_HURTBOX := 1 << 2   # detecta la capa "Hurtbox" (ver project.godot [layer_names])
 
 @export var attack_data: AttackData
+
+## Quién es el "dueño" real del golpe para efectos de daño/robo de vida/
+## autogolpe. get_owner() alcanza para el Hitbox propio de Player/Enemy (la
+## escena empaquetada les asigna owner automáticamente), pero un Projectile/
+## SpellBurst instanciado suelto en runtime no tiene owner — hay que setear
+## esto a mano al spawnearlo (ver Player._fire_projectile_spell / RangedEnemy).
+var source_override: Node = null
 
 var _active: bool = false
 var _hit_targets_this_swing: Array[Hurtbox] = []
@@ -61,11 +69,14 @@ func _on_area_entered(area: Area2D) -> void:
 func _try_hit(area: Area2D) -> void:
 	if not (area is Hurtbox):
 		return
-	if area.get_owner() == get_owner():
+	var attacker: Node = source_override if source_override else get_owner()
+	if area.get_owner() == attacker:
 		return  # no golpearse a uno mismo (el propio Hurtbox también es capa "Hurtbox")
 	if _hit_targets_this_swing.has(area):
 		return  # evita múltiples golpes del mismo swing sobre el mismo objetivo
 
 	_hit_targets_this_swing.append(area)
-	area.receive_hit(attack_data, get_owner())
+	var is_crit: bool = area.receive_hit(attack_data, attacker)
 	hit_landed.emit(area)
+	if is_crit:
+		critical_hit_landed.emit(area)

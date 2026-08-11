@@ -47,5 +47,6 @@ func _fire_projectile(direction: Vector2) -> void:
 	var projectile: Projectile = projectile_scene.instantiate()
 	projectile.direction = direction
 	projectile.speed = projectile_speed
+	projectile.source_override = self
 	get_parent().add_child(projectile)
 	projectile.global_position = global_position + direction * muzzle_offset

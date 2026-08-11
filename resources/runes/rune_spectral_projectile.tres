@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RuneData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/rune_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+rune_name = "Proyectil Espectral"
+description = "Forma: el hechizo se lanza como un proyectil de alma a distancia en vez de un tajo cuerpo a cuerpo. Mismo daño base, pero golpea lejos."
+category = 0
+damage_multiplier_delta = 0.0
+knockback_delta = 0.0
+hitbox_radius_multiplier = 1.0
+makes_projectile = true

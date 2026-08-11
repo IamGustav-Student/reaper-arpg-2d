@@ -14,6 +14,7 @@ enum RuneCategory { SHAPE, MODIFIER, TRIGGER }
 @export var damage_multiplier_delta: float = 0.0
 @export var knockback_delta: float = 0.0
 @export var hitbox_radius_multiplier: float = 1.0
+@export var makes_projectile: bool = false
 
 ## Runas de Modificador (MODIFIER).
 @export var lifesteal_percent: float = 0.0

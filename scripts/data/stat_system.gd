@@ -15,6 +15,7 @@ var max_health: float
 var physical_damage: float
 var magic_damage: float
 var crit_chance: float
+var crit_multiplier: float
 var attack_speed_mult: float
 var move_speed_mult: float
 var cooldown_reduction: float
@@ -27,6 +28,7 @@ func recalculate_stats() -> void:
 	physical_damage = 10.0 + (strength * 2.0)
 	magic_damage = intelligence * 2.5
 	crit_chance = 5.0 + (agility * 0.25)
+	crit_multiplier = 1.5  # sin stat que lo escale todavía (GDD 4.2 solo documenta crit_chance por agilidad)
 	attack_speed_mult = 1.0 + (agility * 0.003)
 	move_speed_mult = 1.0 + (agility * 0.0015)
 	cooldown_reduction = clamp(runic_affinity * 0.0035, 0.0, 0.40)

@@ -14,6 +14,8 @@ static func compose(base: AttackData, runes: Array[RuneData]) -> AttackData:
 				result.base_damage_multiplier += rune.damage_multiplier_delta
 				result.knockback_force += rune.knockback_delta
 				result.hitbox_radius_multiplier *= rune.hitbox_radius_multiplier
+				if rune.makes_projectile:
+					result.is_projectile = true
 			RuneData.RuneCategory.MODIFIER:
 				result.lifesteal_percent += rune.lifesteal_percent
 				if rune.applies_dot:

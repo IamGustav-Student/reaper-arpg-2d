@@ -13,6 +13,11 @@ signal loadout_changed
 const UNLOCK_COST := 30.0
 const MAX_RUNES_PER_SLOT := 3
 
+## Runas de Desencadenante (Hito 13): identidad fija para poder preguntar
+## "¿este slot dispara automático con X evento?" sin comparar por nombre.
+const TRIGGER_ON_DODGE: RuneData = preload("res://resources/runes/rune_on_dodge.tres")
+const TRIGGER_ON_CRIT: RuneData = preload("res://resources/runes/rune_on_crit.tres")
+
 var unlocked_runes: Array[RuneData] = []
 var active_slot_runes: Array[RuneData] = []
 var mobility_slot_runes: Array[RuneData] = []
@@ -55,6 +60,14 @@ func equip(rune: RuneData, slot: String) -> bool:
 
 func is_equipped(rune: RuneData, slot: String) -> bool:
 	return _slot_array(slot).has(rune)
+
+## true si el jugador crafteó ese slot para dispararse solo con Dash/Crítico
+## (Hito 13). Player los consulta para saber si debe auto-castear el slot.
+func has_dodge_trigger(slot: String) -> bool:
+	return is_equipped(TRIGGER_ON_DODGE, slot)
+
+func has_crit_trigger(slot: String) -> bool:
+	return is_equipped(TRIGGER_ON_CRIT, slot)
 
 ## Compone el AttackData real para lo que el jugador tenga craftado en un
 ## slot. Si el slot está vacío, devuelve el `base` sin cambios (compatible

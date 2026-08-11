@@ -36,7 +36,7 @@ text = "Slot Movilidad"
 offset_left = 20.0
 offset_top = 50.0
 offset_right = 980.0
-offset_bottom = 130.0
+offset_bottom = 120.0
 text_overrun_behavior = 3
 autowrap_mode = 2
 
@@ -44,96 +44,110 @@ autowrap_mode = 2
 offset_left = 1000.0
 offset_top = 50.0
 offset_right = 1160.0
-offset_bottom = 130.0
+offset_bottom = 120.0
 text = "Equipar"
 
 [node name="UnlockButton2" type="Button" parent="Panel"]
 offset_left = 20.0
-offset_top = 135.0
+offset_top = 128.0
 offset_right = 980.0
-offset_bottom = 215.0
+offset_bottom = 198.0
 text_overrun_behavior = 3
 autowrap_mode = 2
 
 [node name="EquipButton2" type="Button" parent="Panel"]
 offset_left = 1000.0
-offset_top = 135.0
+offset_top = 128.0
 offset_right = 1160.0
-offset_bottom = 215.0
+offset_bottom = 198.0
 text = "Equipar"
 
 [node name="UnlockButton3" type="Button" parent="Panel"]
 offset_left = 20.0
-offset_top = 220.0
+offset_top = 206.0
 offset_right = 980.0
-offset_bottom = 300.0
+offset_bottom = 276.0
 text_overrun_behavior = 3
 autowrap_mode = 2
 
 [node name="EquipButton3" type="Button" parent="Panel"]
 offset_left = 1000.0
-offset_top = 220.0
+offset_top = 206.0
 offset_right = 1160.0
-offset_bottom = 300.0
+offset_bottom = 276.0
 text = "Equipar"
 
 [node name="UnlockButton4" type="Button" parent="Panel"]
 offset_left = 20.0
-offset_top = 305.0
+offset_top = 284.0
 offset_right = 980.0
-offset_bottom = 385.0
+offset_bottom = 354.0
 text_overrun_behavior = 3
 autowrap_mode = 2
 
 [node name="EquipButton4" type="Button" parent="Panel"]
 offset_left = 1000.0
-offset_top = 305.0
+offset_top = 284.0
 offset_right = 1160.0
-offset_bottom = 385.0
+offset_bottom = 354.0
 text = "Equipar"
 
 [node name="UnlockButton5" type="Button" parent="Panel"]
 offset_left = 20.0
-offset_top = 390.0
+offset_top = 362.0
 offset_right = 980.0
-offset_bottom = 470.0
+offset_bottom = 432.0
 text_overrun_behavior = 3
 autowrap_mode = 2
 
 [node name="EquipButton5" type="Button" parent="Panel"]
 offset_left = 1000.0
-offset_top = 390.0
+offset_top = 362.0
 offset_right = 1160.0
-offset_bottom = 470.0
+offset_bottom = 432.0
 text = "Equipar"
 
 [node name="UnlockButton6" type="Button" parent="Panel"]
 offset_left = 20.0
-offset_top = 475.0
+offset_top = 440.0
 offset_right = 980.0
-offset_bottom = 555.0
+offset_bottom = 510.0
 text_overrun_behavior = 3
 autowrap_mode = 2
 
 [node name="EquipButton6" type="Button" parent="Panel"]
 offset_left = 1000.0
-offset_top = 475.0
+offset_top = 440.0
 offset_right = 1160.0
-offset_bottom = 555.0
+offset_bottom = 510.0
 text = "Equipar"
 
 [node name="UnlockButton7" type="Button" parent="Panel"]
 offset_left = 20.0
-offset_top = 560.0
+offset_top = 518.0
 offset_right = 980.0
-offset_bottom = 640.0
+offset_bottom = 588.0
 text_overrun_behavior = 3
 autowrap_mode = 2
 
 [node name="EquipButton7" type="Button" parent="Panel"]
 offset_left = 1000.0
-offset_top = 560.0
+offset_top = 518.0
 offset_right = 1160.0
-offset_bottom = 640.0
+offset_bottom = 588.0
 text = "Equipar"
 
+[node name="UnlockButton8" type="Button" parent="Panel"]
+offset_left = 20.0
+offset_top = 596.0
+offset_right = 980.0
+offset_bottom = 666.0
+text_overrun_behavior = 3
+autowrap_mode = 2
+
+[node name="EquipButton8" type="Button" parent="Panel"]
+offset_left = 1000.0
+offset_top = 596.0
+offset_right = 1160.0
+offset_bottom = 666.0
+text = "Equipar"
